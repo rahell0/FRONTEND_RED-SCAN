@@ -1,6 +1,11 @@
-/* Styling Tambahan Khusus Card Forgot Password */
+/* =================================================== */
+/* Styling Tambahan Khusus Card Forgot Password        */
+/* =================================================== */
+
 .forgot-card-box {
   max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .stepper-bar-wrap {

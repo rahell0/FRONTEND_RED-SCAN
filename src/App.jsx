@@ -1,469 +1,347 @@
 import React, { useState } from 'react';
+import { 
+  LayoutDashboard, 
+  History, 
+  Boxes, 
+  BarChart3, 
+  Clock, 
+  User, 
+  LogOut as LogOutIcon, 
+  Bell 
+} from 'lucide-react';
+
+// Import logo dari folder assets
+import logo from './assets/logo.png';
+
+// Import Komponen Halaman
 import Welcome from './components/Welcome';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
 import Dashboard from './components/Dashboard';
+import ProfilePage from './components/Profile';
+import Stok from './components/Stok';
+import DataPemesanan from './components/DataPemesanan';
+import HistoryPage from './components/History';
+import Notifikasi from './components/Notifikasi';
+import LaporanOmzet from './components/LaporanOmzet';
+import BuktiTransaksi from './components/BuktiTransaksi';
+import LogOut from './components/LogOut';
 
 export default function App() {
-  const [page, setPage] = useState('welcome'); // 'welcome' | 'login' | 'register' | 'forgot' | 'dashboard'
+  const [page, setPage] = useState('welcome');
+  const [shift, setShift] = useState('16:00 - 00:00');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [shift, setShift] = useState('08:00 - 16:00');
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  
+
+  // STATE POPUP LOGOUT
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // STATE NAMA USER GLOBAL
+  const [user, setUser] = useState({
+    name: 'Annisa K.',
+    email: 'annisa@redscan.pos',
+    username: 'annisa_kasir'
+  });
+
+  const isAuthPage = ['welcome', 'login', 'register', 'forgot'].includes(page);
+
+  // Helper untuk format judul header berdasarkan state page
+  const getPageTitle = (currentPage) => {
+    switch (currentPage) {
+      case 'dashboard': return 'Dashboard';
+      case 'history': return 'History';
+      case 'stok': return 'Stok Bahan';
+      case 'laporan-omzet': return 'Laporan Omzet';
+      case 'pemesanan': return 'Data Pemesanan';
+      case 'profile': return 'Profil Saya';
+      case 'notifikasi': return 'Notifikasi';
+      case 'bukti-transaksi': return 'Bukti Transaksi';
+      default: return currentPage;
+    }
+  };
+
+  // Function eksekusi Log Out
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    setPage('welcome');
+  };
 
   return (
     <>
+      {/* GOOGLE FONTS MODERN (Inter & Plus Jakarta Sans) */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
         * {
-          box-sizing: border-box !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          font-family: 'Plus Jakarta Sans', sans-serif !important;
+          font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
 
-        body, html {
-          width: 100vw !important;
-          min-height: 100vh !important;
-          background-color: #EFECE6 !important;
-          color: #1F1915 !important;
+        h1, h2, h3, h4, h5, h6 {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          letter-spacing: -0.02em;
         }
 
-        /* --- STYLES AUTH (WELCOME, LOGIN, REGISTER, FORGOT) --- */
-        .auth-container {
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-          width: 100vw !important;
-          min-height: 100vh !important;
-          background-color: #EFECE6 !important;
-          padding: 24px !important;
+        /* Smooth scroll & Clean Scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
         }
-
-        .card-box {
-          background-color: #EFECE6 !important;
-          width: 100% !important;
-          max-width: 440px !important;
-          min-height: 600px !important;
-          border-radius: 32px !important;
-          border: 1px solid #D1C9C1 !important;
-          box-shadow: 12px 12px 0px #5A5652 !important;
-          padding: 36px 32px !important;
-          display: flex !important;
-          flex-direction: column !important;
-          justify-content: space-between !important;
-          align-items: center !important;
-          text-align: center !important;
+        ::-webkit-scrollbar-track {
+          background: transparent;
         }
-
-        .logo-section {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
+        ::-webkit-scrollbar-thumb {
+          background: #d1c7bd;
+          border-radius: 99px;
         }
-
-        .logo-box {
-          width: 64px !important;
-          height: 64px !important;
-          background: linear-gradient(135deg, #E54322, #C22D11) !important;
-          border-radius: 18px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          margin-bottom: 8px !important;
-          box-shadow: 0 4px 12px rgba(229, 67, 34, 0.25) !important;
+        ::-webkit-scrollbar-thumb:hover {
+          background: #a89f95;
         }
-
-        .logo-title {
-          font-size: 22px !important;
-          font-weight: 800 !important;
-          color: #E54322 !important;
-        }
-
-        .logo-subtitle {
-          font-size: 8.5px !important;
-          font-weight: 700 !important;
-          color: #C2B9B0 !important;
-          letter-spacing: 1.5px !important;
-          margin-top: 2px !important;
-        }
-
-        .tagline-text {
-          font-size: 23px !important;
-          font-weight: 700 !important;
-          color: #1F1915 !important;
-          line-height: 1.45 !important;
-          margin: 36px 0 !important;
-        }
-
-        .btn-brown {
-          width: 100% !important;
-          background-color: #33241C !important;
-          color: #FFFFFF !important;
-          border: none !important;
-          padding: 14px 0 !important;
-          border-radius: 12px !important;
-          font-size: 15px !important;
-          font-weight: 700 !important;
-          cursor: pointer !important;
-          margin-top: 10px !important;
-        }
-
-        .btn-brown:hover {
-          background-color: #231812 !important;
-        }
-
-        .switch-info {
-          font-size: 13.5px !important;
-          color: #8A8178 !important;
-          margin-top: 14px !important;
-        }
-
-        .switch-btn {
-          color: #1F1915 !important;
-          font-weight: 700 !important;
-          cursor: pointer !important;
-        }
-
-        .form-box {
-          width: 100% !important;
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 12px !important;
-          text-align: left !important;
-          margin: 12px 0 !important;
-        }
-
-        .input-group {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 6px !important;
-        }
-
-        .input-group label {
-          font-size: 12.5px !important;
-          font-weight: 700 !important;
-          color: #1F1915 !important;
-        }
-
-        .input-field-wrap {
-          position: relative !important;
-          display: flex !important;
-          align-items: center !important;
-        }
-
-        .input-field-wrap input, .input-field-wrap select {
-          width: 100% !important;
-          padding: 11px 38px 11px 38px !important;
-          border-radius: 12px !important;
-          border: 1px solid #D8D1C9 !important;
-          background-color: #FFFFFF !important;
-          font-size: 13px !important;
-          outline: none !important;
-          color: #333 !important;
-          appearance: none !important;
-          -webkit-appearance: none !important;
-        }
-
-        .input-icon-left {
-          position: absolute !important;
-          left: 12px !important;
-          font-size: 14px !important;
-          color: #8A8178 !important;
-          pointer-events: none !important;
-        }
-
-        .select-arrow-right {
-          position: absolute !important;
-          right: 14px !important;
-          font-size: 10px !important;
-          color: #1F1915 !important;
-          pointer-events: none !important;
-        }
-
-        .eye-btn-right {
-          position: absolute !important;
-          right: 12px !important;
-          background: none !important;
-          border: none !important;
-          cursor: pointer !important;
-          font-size: 14px !important;
-          opacity: 0.6 !important;
-        }
-
-        .forgot-link {
-          text-align: right !important;
-          margin-top: 4px !important;
-        }
-
-        .forgot-link a {
-          font-size: 11.5px !important;
-          font-weight: 600 !important;
-          color: #1F1915 !important;
-          text-decoration: none !important;
-        }
-
-        /* STYLES KHUSUS LUPA KATA SANDI */
-        .forgot-wrapper {
-          width: 100% !important;
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-        }
-
-        .forgot-header-bar {
-          width: 100% !important;
-          display: flex !important;
-          justify-content: space-between !important;
-          align-items: center !important;
-          font-size: 9.5px !important;
-          font-weight: 700 !important;
-          margin-bottom: 12px !important;
-        }
-
-        .green-text { color: #059669 !important; }
-        .muted-text { color: #8A8178 !important; }
-
-        .progress-bar-container {
-          width: 100% !important;
-          display: grid !important;
-          grid-template-columns: 1fr 1fr 1fr !important;
-          gap: 6px !important;
-          margin-bottom: 20px !important;
-        }
-
-        .progress-step {
-          height: 24px !important;
-          background-color: #E2DBD0 !important;
-          border-radius: 6px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          font-size: 9px !important;
-          font-weight: 700 !important;
-          color: #8A8178 !important;
-        }
-
-        .progress-step.active {
-          background-color: #33241C !important;
-          color: #FFFFFF !important;
-        }
-
-        .forgot-icon-box {
-          width: 64px !important;
-          height: 64px !important;
-          background-color: #E2DBD0 !important;
-          border-radius: 16px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          position: relative !important;
-          margin-bottom: 12px !important;
-        }
-
-        .lock-badge {
-          position: absolute !important;
-          bottom: -4px !important;
-          right: -4px !important;
-          background-color: #33241C !important;
-          color: #FFF !important;
-          font-size: 10px !important;
-          padding: 2px 4px !important;
-          border-radius: 50% !important;
-        }
-
-        .forgot-title {
-          font-size: 20px !important;
-          font-weight: 800 !important;
-          color: #1F1915 !important;
-          margin-bottom: 6px !important;
-        }
-
-        .forgot-desc {
-          font-size: 11.5px !important;
-          color: #6B6259 !important;
-          line-height: 1.4 !important;
-          margin-bottom: 14px !important;
-        }
-
-        .info-alert {
-          background-color: #F3EFEA !important;
-          border: 1px solid #E2DBD0 !important;
-          border-radius: 10px !important;
-          padding: 10px !important;
-          display: flex !important;
-          gap: 8px !important;
-          font-size: 10px !important;
-          color: #6B6259 !important;
-          text-align: left !important;
-          line-height: 1.35 !important;
-        }
-
-        .email-pill {
-          background-color: #FAF8F5 !important;
-          border: 1px solid #E2DBD0 !important;
-          border-radius: 20px !important;
-          padding: 4px 12px !important;
-          font-size: 11px !important;
-          font-weight: 700 !important;
-          color: #1F1915 !important;
-          margin-bottom: 12px !important;
-        }
-
-        .edit-link {
-          color: #059669 !important;
-          cursor: pointer !important;
-        }
-
-        .otp-container {
-          display: flex !important;
-          justify-content: space-between !important;
-          gap: 6px !important;
-          margin: 8px 0 !important;
-        }
-
-        .otp-input {
-          width: 44px !important;
-          height: 48px !important;
-          text-align: center !important;
-          font-size: 18px !important;
-          font-weight: 800 !important;
-          border-radius: 10px !important;
-          border: 1px solid #D8D1C9 !important;
-          background-color: #FFFFFF !important;
-          outline: none !important;
-        }
-
-        .timer-row {
-          display: flex !important;
-          justify-content: space-between !important;
-          align-items: center !important;
-          background-color: #F3EFEA !important;
-          padding: 8px 12px !important;
-          border-radius: 8px !important;
-          font-size: 10.5px !important;
-          color: #6B6259 !important;
-          margin-top: 8px !important;
-        }
-
-        .resend-link {
-          font-weight: 700 !important;
-          color: #1F1915 !important;
-          cursor: pointer !important;
-        }
-
-        .back-link {
-          font-size: 11.5px !important;
-          font-weight: 700 !important;
-          color: #1F1915 !important;
-          text-align: center !important;
-          margin-top: 12px !important;
-          cursor: pointer !important;
-        }
-
-        .req-checklist {
-          display: flex !important;
-          justify-content: space-between !important;
-          font-size: 9.5px !important;
-          color: #8A8178 !important;
-          font-weight: 600 !important;
-          margin-top: 4px !important;
-        }
-
-        .step-checks {
-          display: flex !important;
-          gap: 8px !important;
-          font-size: 8.5px !important;
-          color: #8A8178 !important;
-        }
-
-        .footer-security-notes {
-          display: flex !important;
-          gap: 8px !important;
-          font-size: 9.5px !important;
-          color: #8A8178 !important;
-          margin-top: 16px !important;
-        }
-
-        .footer-sec {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          gap: 4px !important;
-          margin-top: 16px !important;
-        }
-
-        .enc-text {
-          font-size: 10.5px !important;
-          color: #8A8178 !important;
-          font-weight: 600 !important;
-          display: flex !important;
-          align-items: center !important;
-          gap: 4px !important;
-        }
-
-        .copy-text {
-          font-size: 9px !important;
-          color: #B5ACA3 !important;
-        }
-
-        /* --- STYLES DASHBOARD KASIR (TIDAK BERUBAH) --- */
-        .dash-layout {
-          display: flex !important;
-          width: 100vw !important;
-          min-height: 100vh !important;
-          background-color: #EFECE6 !important;
-        }
-        /* ... SISA CSS DASHBOARD SAMA PERSIS ... */
       `}</style>
 
-      {/* HALAMAN AUTH */}
-      {page !== 'dashboard' && (
-        <div className="auth-container">
-          <div className="card-box">
-            <div className="logo-section">
-              <div className="logo-box">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="m9 12 2 2 4-4"/>
-                </svg>
-              </div>
-              <span className="logo-title">REDScan</span>
-              <span className="logo-subtitle">POS ENTERPRISE CLOUD</span>
-            </div>
-
-            {page === 'welcome' && <Welcome setPage={setPage} />}
-            {page === 'login' && (
+      {/* 1. HALAMAN AUTHENTICATION (Welcome, Login, Register, Forgot) */}
+      {isAuthPage ? (
+        <div className="min-h-screen w-full bg-[#EFECE6] flex justify-center items-center p-4 antialiased">
+          {page === 'welcome' && <Welcome setPage={setPage} />}
+          
+          {page === 'login' && (
+            <div className="bg-[#EAE6DE] w-full max-w-[440px] rounded-[32px] border border-[#D8D1C7] shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-7 sm:p-9 flex flex-col items-center">
               <Login
                 shift={shift}
                 setShift={setShift}
                 showPassword={showPassword}
                 setShowPassword={setShowPassword}
                 setPage={setPage}
+                setUser={setUser}
               />
-            )}
-            {page === 'register' && (
+            </div>
+          )}
+
+          {page === 'register' && (
+            <div className="bg-[#EAE6DE] w-full max-w-[440px] rounded-[32px] border border-[#D8D1C7] shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-7 sm:p-9 flex flex-col items-center">
               <Register
                 showPassword={showPassword}
                 setShowPassword={setShowPassword}
                 showConfirmPassword={showConfirmPassword}
                 setShowConfirmPassword={setShowConfirmPassword}
                 setPage={setPage}
+                setUser={setUser}
               />
-            )}
-            {page === 'forgot' && <ForgotPassword setPage={setPage} />}
-
-            <div className="footer-sec">
-              <p className="enc-text">🛡️ Enkripsi Berstandar Industri 256–Bit</p>
-              <p className="copy-text">© 2025 REDScan Security System. Seluruh hak cipta dilindungi.</p>
             </div>
+          )}
+
+          {page === 'forgot' && (
+            <div className="bg-[#EAE6DE] w-full max-w-[440px] rounded-[32px] border border-[#D8D1C7] shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-7 sm:p-9 flex flex-col items-center">
+              <ForgotPassword setPage={setPage} />
+            </div>
+          )}
+        </div>
+      ) : (
+        /* 2. DASHBOARD APLIKASI UTAMA */
+        <div className="flex w-screen h-screen overflow-hidden bg-[#F4F1EA] text-[#1F1915] antialiased">
+          
+          {/* SIDEBAR KIRI */}
+          <aside className="w-64 min-w-[256px] bg-[#1C1613] text-white flex flex-col justify-between p-5 shrink-0 h-full select-none border-r border-[#2D2420]">
+            <div>
+              {/* Logo Brand */}
+              <div className="flex items-center gap-3 px-2 mb-8 mt-1">
+                <img src={logo} alt="REDScan Logo" className="h-7 w-auto object-contain" />
+                <div>
+                  <h1 className="text-base font-bold leading-none text-white tracking-tight">REDScan</h1>
+                  <p className="text-[9px] text-[#8C827A] font-medium tracking-wider uppercase mt-1">POS Enterprise</p>
+                </div>
+              </div>
+
+              {/* Navigasi Menu */}
+              <div className="text-[10px] font-bold text-[#786E65] uppercase tracking-widest px-3 mb-2.5">
+                Menu Utama
+              </div>
+              <nav className="flex flex-col gap-1.5">
+                <button
+                  onClick={() => setPage('dashboard')}
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold w-full transition-all duration-200 ${
+                    page === 'dashboard' 
+                      ? 'bg-[#332620] text-white shadow-sm border border-[#47362E]' 
+                      : 'text-[#A3988E] hover:bg-[#261E1A] hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <LayoutDashboard className={page === 'dashboard' ? 'text-[#E54322]' : 'text-[#8C827A]'} size={17} />
+                    <span className="tracking-wide">Dashboard</span>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                </button>
+
+                <button
+                  onClick={() => setPage('history')}
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium w-full transition-all duration-200 ${
+                    page === 'history' || page === 'pemesanan' || page === 'bukti-transaksi'
+                      ? 'bg-[#332620] text-white shadow-sm border border-[#47362E]' 
+                      : 'text-[#A3988E] hover:bg-[#261E1A] hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <History size={17} className={page === 'history' || page === 'pemesanan' || page === 'bukti-transaksi' ? 'text-white' : 'text-[#8C827A]'} />
+                    <span className="tracking-wide">History</span>
+                  </div>
+                  <span className="text-[10px] bg-[#2A201B] px-2 py-0.5 rounded-md text-[#C2B7AC] font-semibold border border-[#3A2D26]">150</span>
+                </button>
+
+                <button
+                  onClick={() => setPage('stok')}
+                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium w-full transition-all duration-200 ${
+                    page === 'stok' 
+                      ? 'bg-[#332620] text-white shadow-sm border border-[#47362E]' 
+                      : 'text-[#A3988E] hover:bg-[#261E1A] hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Boxes size={17} className={page === 'stok' ? 'text-white' : 'text-[#8C827A]'} />
+                    <span className="tracking-wide">Stok Bahan</span>
+                  </div>
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                </button>
+
+                <button
+                  onClick={() => setPage('laporan-omzet')}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium w-full text-left transition-all duration-200 ${
+                    page === 'laporan-omzet' 
+                      ? 'bg-[#332620] text-white shadow-sm border border-[#47362E]' 
+                      : 'text-[#A3988E] hover:bg-[#261E1A] hover:text-white'
+                  }`}
+                >
+                  <BarChart3 size={17} className={page === 'laporan-omzet' ? 'text-white' : 'text-[#8C827A]'} />
+                  <span className="tracking-wide">Laporan Omzet</span>
+                </button>
+              </nav>
+            </div>
+
+            {/* Profile Sidebar Bawah */}
+            <div className="pt-4 border-t border-[#2D2420] flex flex-col gap-3">
+              <div className="flex items-center gap-3 px-1">
+                <div className="w-9 h-9 rounded-full bg-[#3B2E27] text-white flex items-center justify-center font-bold text-xs border border-[#524137] shrink-0 uppercase">
+                  {user?.name ? user.name.substring(0, 2) : 'AK'}
+                </div>
+                <div className="overflow-hidden">
+                  <h4 className="text-xs font-bold text-white truncate m-0 tracking-tight">
+                    {user?.name || 'Annisa K.'}
+                  </h4>
+                  <p className="text-[10px] text-[#8C827A] mt-0.5 m-0 font-medium">Head Cashier</p>
+                </div>
+              </div>
+
+              <div className="bg-[#241C18] p-2.5 rounded-xl flex items-center justify-between border border-[#332721]">
+                <div className="flex items-center gap-2 text-[#C2B7AC] text-[11px] font-medium">
+                  <Clock className="text-amber-500" size={13} />
+                  <span>Shift: {shift}</span>
+                </div>
+                <span className="bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/20">
+                  AKTIF
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => setPage('profile')}
+                  className="flex items-center justify-center gap-1.5 p-2 bg-[#241C18] text-[#C2B7AC] rounded-xl border border-[#332721] text-[11px] font-medium hover:bg-[#2F241F] hover:text-white transition-all cursor-pointer"
+                >
+                  <User size={13} />
+                  <span>Profil</span>
+                </button>
+                <button 
+                  onClick={() => setShowLogoutModal(true)}
+                  className="flex items-center justify-center gap-1.5 p-2 bg-[#2C1914] text-red-400 rounded-xl border border-[#42221B] text-[11px] font-medium hover:bg-[#3D211A] transition-all cursor-pointer"
+                >
+                  <LogOutIcon size={13} />
+                  <span>Keluar</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* AREA KANAN */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            
+            {/* HEADER ATAS */}
+            <header className="h-16 min-h-[64px] bg-white border-b border-[#E6DFD5] px-6 flex items-center justify-between shrink-0 z-10 shadow-xs">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-bold text-[#1F1915] uppercase tracking-wider">
+                  {getPageTitle(page)}
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setPage('notifikasi')}
+                  className="relative p-2 text-[#6B6259] hover:text-[#1F1915] rounded-xl hover:bg-[#F4F1EA] transition-all cursor-pointer"
+                >
+                  <Bell size={18} />
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E54322]"></span>
+                </button>
+
+                <div className="h-5 w-[1px] bg-[#E6DFD5]"></div>
+
+                <div className="text-xs text-right leading-tight">
+                  <p className="font-bold text-[#1F1915]">{user?.name || 'Annisa K.'}</p>
+                  <p className="text-[10px] text-[#8A8178] font-medium">Malang Outlet</p>
+                </div>
+              </div>
+            </header>
+
+            {/* AREA KONTEN UTAMA */}
+            <main className="flex-1 overflow-y-auto p-6 bg-[#F4F1EA]">
+              {page === 'dashboard' && (
+                <Dashboard 
+                  user={user} 
+                  shift={shift} 
+                  setPage={setPage} 
+                  setSelectedTransaction={setSelectedTransaction} 
+                  onOpenLogout={() => setShowLogoutModal(true)}
+                />
+              )}
+
+              {page === 'history' && (
+                <HistoryPage 
+                  user={user} 
+                  shift={shift} 
+                  setPage={setPage} 
+                  setSelectedTransaction={setSelectedTransaction} 
+                  onOpenLogout={() => setShowLogoutModal(true)}
+                />
+              )}
+
+              {page === 'bukti-transaksi' && (
+                <BuktiTransaksi 
+                  selectedTransaction={selectedTransaction} 
+                  user={user} 
+                  setPage={setPage} 
+                  onOpenLogout={() => setShowLogoutModal(true)}
+                />
+              )}
+
+              {page === 'pemesanan' && <DataPemesanan user={user} shift={shift} setPage={setPage} onOpenLogout={() => setShowLogoutModal(true)} />}
+              {page === 'stok' && <Stok user={user} shift={shift} setPage={setPage} onOpenLogout={() => setShowLogoutModal(true)} />}
+              {page === 'laporan-omzet' && <LaporanOmzet user={user} shift={shift} setPage={setPage} onOpenLogout={() => setShowLogoutModal(true)} />}
+              {page === 'profile' && <ProfilePage user={user} setUser={setUser} shift={shift} setPage={setPage} onOpenLogout={() => setShowLogoutModal(true)} />}
+              {page === 'notifikasi' && <Notifikasi user={user} shift={shift} setPage={setPage} onOpenLogout={() => setShowLogoutModal(true)} />}
+            </main>
+
           </div>
+
         </div>
       )}
 
-      {/* HALAMAN DASHBOARD */}
-      {page === 'dashboard' && <Dashboard shift={shift} setPage={setPage} />}
+      {/* POPUP LOGOUT GLOBAL */}
+      <LogOut
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleConfirmLogout}
+        sessionId="#8820-POS-01"
+      />
     </>
   );
 }
