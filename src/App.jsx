@@ -11,20 +11,24 @@ import {
 } from 'lucide-react';
 
 // Import logo dari folder assets
-import logo from './assets/logo.png';
+import logo from "./assets/logo.png";
 
-// Import Komponen Halaman
-import Welcome from './components/Welcome';
-import Login from './components/Login';
-import Register from './components/Register';
-import ForgotPassword from './components/ForgotPassword';
-import Dashboard from './components/Dashboard';
-import ProfilePage from './components/Profile';
-import Stok from './components/Stok';
-import DataPemesanan from './components/DataPemesanan';
-import HistoryPage from './components/History';
+// ==========================================
+// FIX IMPORT PATH Halaman Utama (Sub-Folder pages)
+// ==========================================
+import Welcome from './pages/Landingpage/Welcome';
+import Login from './pages/auth/Login/Login';
+import Register from './pages/auth/Register/Register';
+import ForgotPassword from './pages/auth/ForgotPassword/ForgotPassword';
+import Dashboard from './pages/(dashboard)/Dashboard/Dashboard';
+import ProfilePage from './pages/(dashboard)/Profile/Profile';
+import Stok from './pages/(dashboard)/Stok/Stok';
+import DataPemesanan from './pages/(dashboard)/DataPemesanan/DataPemesanan';
+import HistoryPage from './pages/(dashboard)/History/History';
+import LaporanOmzet from './pages/(dashboard)/Omzet/LaporanOmzet';
+
+// Import Komponen Reusable (dari folder components)
 import Notifikasi from './components/Notifikasi';
-import LaporanOmzet from './components/LaporanOmzet';
 import BuktiTransaksi from './components/BuktiTransaksi';
 import LogOut from './components/LogOut';
 
@@ -34,7 +38,6 @@ export default function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  
 
   // STATE POPUP LOGOUT
   const [showLogoutModal, setShowLogoutModal] = useState(false);

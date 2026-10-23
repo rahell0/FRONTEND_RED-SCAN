@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import logo from '../assets/logo.png';
+import logo from '../../../assets/logo.png';
 import { Eye, EyeOff, Lock, User, Mail, ShieldCheck } from 'lucide-react';
+import API from '../../../services/api';
 
 export default function Register({ 
   showPassword, 
