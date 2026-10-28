@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '../../../assets/logo.png';
 import { Eye, EyeOff, Lock, User, Mail, ShieldCheck } from 'lucide-react';
 import API from '../../../services/api';
@@ -8,9 +9,9 @@ export default function Register({
   setShowPassword, 
   showConfirmPassword, 
   setShowConfirmPassword, 
-  setPage, 
   setUser 
 }) {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [usernameInput, setUsernameInput] = useState('');
@@ -28,7 +29,9 @@ export default function Register({
     }
 
     alert(`Pendaftaran berhasil! Selamat datang, ${fullName || 'Pengguna'}.`);
-    setPage('dashboard');
+    
+    // Arahkan ke halaman dashboard
+    navigate('/dashboard');
   };
 
   return (
@@ -165,7 +168,7 @@ export default function Register({
 
       <div className="mt-3 text-center">
         <button
-          onClick={() => setPage('login')}
+          onClick={() => navigate('/login')}
           className="text-xs text-[#6B5E52] cursor-pointer"
         >
           Sudah punya akun? <span className="font-bold text-[#2C221E]">Login →</span>

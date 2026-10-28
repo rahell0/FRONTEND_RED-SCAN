@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Search, 
   RotateCw, 
@@ -69,7 +70,8 @@ const INITIAL_TRANSACTIONS = [
   }
 ];
 
-export default function Dashboard({ user, shift, setPage }) {
+export default function Dashboard({ user, shift }) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showFullProof, setShowFullProof] = useState(false);
@@ -126,7 +128,8 @@ export default function Dashboard({ user, shift, setPage }) {
 
       {/* 3 CARDS STATISTIK */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs">
+        {/* Card 1: Total Transaksi */}
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs min-w-0">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
               TOTAL TRANSAKSI<br />HARI INI
@@ -141,7 +144,8 @@ export default function Dashboard({ user, shift, setPage }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs">
+        {/* Card 2: Total Omzet Hari Ini */}
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs min-w-0">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
               TOTAL OMZET HARI<br />INI
@@ -152,11 +156,11 @@ export default function Dashboard({ user, shift, setPage }) {
           </div>
 
           <div className="mt-3">
-            <div className="text-2xl font-black text-[#1A1A1A] whitespace-nowrap">
+            <div className="text-xl sm:text-2xl font-black text-[#1A1A1A] break-words">
               Rp 3.500.000
             </div>
 
-            <div className="flex items-center gap-3 mt-2.5 pt-2.5 border-t border-gray-100 text-xs text-gray-500 whitespace-nowrap">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 pt-2.5 border-t border-gray-100 text-xs text-gray-500">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                 <span>QRIS: <b className="text-gray-800">Rp 2.450.000</b></span>
@@ -169,7 +173,8 @@ export default function Dashboard({ user, shift, setPage }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs">
+        {/* Card 3: Lihat Pesanan Hari Ini */}
+        <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col justify-between shadow-xs min-w-0">
           <div>
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider leading-relaxed">
@@ -186,7 +191,7 @@ export default function Dashboard({ user, shift, setPage }) {
             <p className="text-[11px] text-gray-400 mt-1 m-0">Semua pesanan shift ini telah terselesaikan dengan baik.</p>
           </div>
           <button 
-            onClick={() => setPage && setPage('pemesanan')}
+            onClick={() => navigate('/pemesanan')}
             className="w-full mt-4 py-2.5 px-4 bg-[#FAF7F2] text-[#1A1A1A] text-xs font-bold rounded-xl border border-[#EBE2D7] flex items-center justify-center gap-2 hover:bg-[#F2EBDC] transition-colors cursor-pointer"
           >
             <span>Buka Layar Pemesanan</span>
@@ -206,19 +211,20 @@ export default function Dashboard({ user, shift, setPage }) {
             <p className="text-xs text-gray-400 mt-1 m-0">Daftar transaksi kasir yang selesai diproses hari ini</p>
           </div>
 
-          {/* PERBAIKAN SEARCH & RESET (UKURAN & ROUNDED SAMA PERSIS) */}
+          {/* SEARCH & RESET (SEJAJAR PRESISI & SIMETRIS) */}
           <div className="flex items-center gap-2">
-            <div className="relative w-full sm:w-64">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative w-full sm:w-64 flex items-center">
+              <Search size={15} className="absolute left-3.5 text-gray-400 pointer-events-none" />
               <input 
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari No. Struk/Meja . . ." 
-                className="w-full h-10 bg-[#FAF7F2] border border-[#EBE2D7] rounded-2xl pl-9 pr-3 text-xs text-gray-700 outline-none focus:border-[#3D5256] transition-colors placeholder:text-gray-400"
+                className="w-full h-10 bg-[#FAF7F2] border border-[#EBE2D7] rounded-2xl pl-9 pr-3 text-xs text-gray-700 outline-none focus:border-[#3D5256] transition-colors placeholder:text-gray-400 flex items-center leading-normal"
               />
             </div>
             <button 
+              type="button"
               onClick={() => setSearchQuery('')}
               className="w-10 h-10 bg-[#FAF7F2] border border-[#EBE2D7] rounded-2xl flex items-center justify-center text-gray-600 hover:bg-[#F2EBDC] transition-colors cursor-pointer shrink-0"
               title="Reset Filter"
@@ -295,7 +301,7 @@ export default function Dashboard({ user, shift, setPage }) {
         <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
           <span>Menampilkan {filteredTransactions.length} dari 150 transaksi hari ini</span>
           <button 
-            onClick={() => setPage && setPage('history')}
+            onClick={() => navigate('/history')}
             className="text-[#1A1A1A] font-bold flex items-center gap-1 hover:underline cursor-pointer text-xs"
           >
             <span>Buka Semua Riwayat</span>
