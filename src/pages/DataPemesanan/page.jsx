@@ -7,13 +7,15 @@ import {
 } from 'react';
 
 import API from '../../services/api';
+import { useNotification } from '../../context/NotificationContext';
 
 import OrderSearchFilter from './components/OrderSearchFilter.jsx';
 import OrdersTable from './components/OrdersTable.jsx';
 import EditOrderModal from './components/EditOrderModal.jsx';
 
 export default function DataPemesanan() {
-  // 1. STATE
+  const { notify } = useNotification();
+
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,66 +34,76 @@ export default function DataPemesanan() {
     status: 'diproses',
   });
 
-  // 2. MENGAMBIL DATA PEMESANAN DARI BACKEND
-  const fetchOrders = useCallback(async () => {
+  // Mengambil data pemesanan dari backend.
+  // silent = true berarti memperbarui data tanpa loading ulang.
+  const fetchOrders = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
-      setErrorMessage('');
+      if (!silent) {
+        setLoading(true);
+        setErrorMessage('');
+      }
 
       const response = await API.get('/pemesanan');
-
       const data = response.data?.data ?? [];
 
-      const formattedOrders = (Array.isArray(data) ? data : []).map(
-        (item) => {
-          const date = item.created_at
-            ? new Date(item.created_at)
-            : null;
+      const formattedOrders = (
+        Array.isArray(data) ? data : []
+      ).map((item) => {
+        const date = item.created_at
+          ? new Date(item.created_at)
+          : null;
 
-          const validDate =
-            date && !Number.isNaN(date.getTime());
+        const validDate =
+          date && !Number.isNaN(date.getTime());
 
-          const statusRaw = String(
-            item.status ?? '-'
-          ).toLowerCase();
+        const statusRaw = String(
+          item.status ?? '-'
+        ).toLowerCase();
 
-          let displayStatus = statusRaw;
+        let displayStatus = statusRaw;
 
-          if (statusRaw === 'antre') {
-            displayStatus = 'antre';
-          } else if (
-            statusRaw === 'menunggu' ||
-            statusRaw === 'pending' ||
-            statusRaw === 'menunggu pembayaran'
-          ) {
-            displayStatus = 'menunggu pembayaran';
-          } else if (statusRaw === 'diproses') {
-            displayStatus = 'diproses';
-          } else if (statusRaw === 'selesai') {
-            displayStatus = 'selesai';
-          }
-
-          return {
-            id: String(item.id),
-            invoice: item.kode_transaksi ?? '-',
-            customer: '-',
-
-            time: validDate
-              ? date.toLocaleTimeString('id-ID', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
-              : '-',
-
-            type: '-',
-            items: [],
-
-            totalAmount: Number(item.total_harga ?? 0),
-            method: item.metode_pembayaran ?? '-',
-            status: displayStatus,
-          };
+        if (statusRaw === 'antre') {
+          displayStatus = 'antre';
+        } else if (
+          statusRaw === 'menunggu' ||
+          statusRaw === 'pending' ||
+          statusRaw === 'menunggu pembayaran'
+        ) {
+          displayStatus = 'menunggu pembayaran';
+        } else if (statusRaw === 'diproses') {
+          displayStatus = 'diproses';
+        } else if (statusRaw === 'selesai') {
+          displayStatus = 'selesai';
         }
-      );
+
+        return {
+          id: String(item.id),
+          invoice: item.kode_transaksi ?? '-',
+          customer: item.nama_pelanggan ?? '-',
+
+          time: validDate
+            ? date.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : '-',
+
+          type: '-',
+
+          items: Array.isArray(item.detail)
+            ? item.detail.map((detail) => ({
+                qty: Number(detail.jumlah ?? 0),
+                name: detail.nama_menu ?? '-',
+                price: Number(detail.harga ?? 0),
+                subtotal: Number(detail.subtotal ?? 0),
+              }))
+            : [],
+
+          totalAmount: Number(item.total_harga ?? 0),
+          method: item.metode_pembayaran ?? '-',
+          status: displayStatus,
+        };
+      });
 
       setOrderData(formattedOrders);
     } catch (error) {
@@ -100,19 +112,30 @@ export default function DataPemesanan() {
         error
       );
 
-      setErrorMessage(
-        'Gagal memuat data pemesanan dari server.'
-      );
+      if (!silent) {
+        setErrorMessage(
+          'Gagal memuat data pemesanan dari server.'
+        );
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
+  // Ambil data pertama kali dan perbarui setiap 5 detik.
   useEffect(() => {
     fetchOrders();
+
+    const interval = setInterval(() => {
+      fetchOrders(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  // 3. FILTER DAN PENCARIAN
+  // Filter dan pencarian.
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -123,18 +146,23 @@ export default function DataPemesanan() {
         item.type === activeFilter;
 
       if (!matchesFilter) return false;
-
       if (!query) return true;
 
       return (
-        item.customer.toLowerCase().includes(query) ||
-        item.id.toLowerCase().includes(query) ||
-        item.invoice.toLowerCase().includes(query)
+        String(item.customer || '')
+          .toLowerCase()
+          .includes(query) ||
+        String(item.id || '')
+          .toLowerCase()
+          .includes(query) ||
+        String(item.invoice || '')
+          .toLowerCase()
+          .includes(query)
       );
     });
   }, [orderData, activeFilter, searchQuery]);
 
-  // 4. MEMBUKA MODAL EDIT
+  // Membuka modal edit.
   const handleOpenEdit = useCallback((order) => {
     setSelectedOrder(order);
 
@@ -146,13 +174,13 @@ export default function DataPemesanan() {
     setIsModalOpen(true);
   }, []);
 
-  // 5. MENUTUP MODAL
+  // Menutup modal.
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedOrder(null);
   };
 
-  // 6. MENYIMPAN PERUBAHAN STATUS KE BACKEND
+  // Menyimpan perubahan status.
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -168,35 +196,39 @@ export default function DataPemesanan() {
 
       if (response.data?.success === false) {
         throw new Error(
-          response.data.message || 'Gagal memperbarui status.'
+          response.data.message ||
+            'Gagal memperbarui status.'
         );
       }
 
-      // Ambil ulang data terbaru dari database
       await fetchOrders();
 
       setIsModalOpen(false);
       setSelectedOrder(null);
 
-      alert('Status pesanan berhasil diperbarui!');
+      notify(
+        'Status pesanan berhasil diperbarui!',
+        'success',
+        'Status Berhasil Diperbarui'
+      );
     } catch (error) {
       console.error(
         'Gagal memperbarui status:',
         error
       );
 
-      alert(
+      notify(
         error.response?.data?.message ||
-        error.message ||
-        'Gagal memperbarui status pesanan.'
+          error.message ||
+          'Gagal memperbarui status pesanan.',
+        'error',
+        'Gagal Memperbarui Status'
       );
     }
   };
 
-  // 7. TAMPILAN HALAMAN
   return (
     <div className="flex w-full flex-col gap-4">
-
       {loading && (
         <div className="rounded-xl bg-white p-5 text-center text-sm text-gray-500">
           Memuat data pemesanan...

@@ -1,12 +1,12 @@
 
-import { Pencil, MoreHorizontal } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 
 export default function OrdersTable({
   filteredOrders = [],
   totalOrders = 0,
   onEdit,
 }) {
-  // Format status agar tampil rapi
+  // Format status
   const formatStatus = (status) => {
     const normalized = String(status || '').toLowerCase();
 
@@ -56,49 +56,51 @@ export default function OrdersTable({
   };
 
   return (
-    <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-[#E2DBD0] bg-white shadow-xs">
+    <div className="w-full overflow-hidden rounded-xl border border-[#E2DBD0] bg-white shadow-sm">
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[850px] border-collapse text-left">
+      {/* AREA TABEL */}
+      <div className="w-full overflow-x-auto">
+        <table className="w-full min-w-[780px] table-auto border-collapse text-left">
 
+          {/* HEADER */}
           <thead className="bg-[#8B9EA8] text-[#1E293B]">
             <tr>
-              <th className="whitespace-nowrap px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 ID PESANAN
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="min-w-[110px] px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 NAMA PELANGGAN
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 JAM
               </th>
 
-              <th className="min-w-48 px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="min-w-[150px] px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 ITEM PESANAN
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 TOTAL
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-[9px] font-extrabold tracking-wide">
                 METODE
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-center text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-center text-[9px] font-extrabold tracking-wide">
                 STATUS
               </th>
 
-              <th className="whitespace-nowrap px-4 py-3 text-center text-[9px] font-extrabold tracking-wider">
+              <th className="whitespace-nowrap px-3 py-2.5 text-center text-[9px] font-extrabold tracking-wide">
                 AKSI
               </th>
             </tr>
           </thead>
 
+          {/* ISI TABEL */}
           <tbody className="divide-y divide-gray-100">
-
             {filteredOrders.length > 0 ? (
               filteredOrders.map((item) => (
                 <tr
@@ -106,27 +108,30 @@ export default function OrdersTable({
                   className="transition-colors hover:bg-slate-50"
                 >
                   {/* ID PESANAN */}
-                  <td className="whitespace-nowrap px-4 py-3 text-xs font-bold text-slate-800">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-[11px] font-semibold text-slate-800">
                     {item.invoice || item.id}
                   </td>
 
                   {/* NAMA PELANGGAN */}
-                  <td className="px-4 py-3 text-xs font-semibold text-slate-900">
+                  <td className="max-w-[140px] truncate px-3 py-2.5 text-[11px] font-medium text-slate-800">
                     {item.customer || '-'}
                   </td>
 
                   {/* JAM */}
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-[11px] text-slate-500">
                     {item.time || '-'}
                   </td>
 
                   {/* ITEM PESANAN */}
-                  <td className="px-4 py-3 text-xs leading-relaxed text-slate-600">
+                  <td className="max-w-[190px] px-3 py-2.5 text-[11px] leading-relaxed text-slate-600">
                     {item.items?.length > 0 ? (
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-0.5">
                         {item.items.map((it, idx) => (
-                          <div key={`${item.id}-${idx}`}>
-                            <span className="font-semibold text-slate-500">
+                          <div
+                            key={`${item.id}-${idx}`}
+                            className="break-words"
+                          >
+                            <span className="font-semibold text-slate-700">
                               {it.qty}x
                             </span>{' '}
                             {it.name}
@@ -141,19 +146,19 @@ export default function OrdersTable({
                   </td>
 
                   {/* TOTAL */}
-                  <td className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-700">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-[11px] font-semibold text-slate-700">
                     {formatRupiah(item.totalAmount)}
                   </td>
 
-                  {/* METODE PEMBAYARAN */}
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-600">
+                  {/* METODE */}
+                  <td className="whitespace-nowrap px-3 py-2.5 text-[10px] font-medium text-slate-600">
                     {String(item.method || '-').toUpperCase()}
                   </td>
 
                   {/* STATUS */}
-                  <td className="whitespace-nowrap px-4 py-3 text-center">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-center">
                     <span
-                      className={`inline-flex items-center justify-center rounded-full border px-3 py-1 text-[10px] font-bold ${getStatusBadge(item.status)}`}
+                      className={`inline-flex items-center justify-center rounded-full border px-2 py-1 text-[9px] font-bold ${getStatusBadge(item.status)}`}
                     >
                       <span className="mr-1">•</span>
                       {formatStatus(item.status)}
@@ -161,29 +166,16 @@ export default function OrdersTable({
                   </td>
 
                   {/* AKSI */}
-                  <td className="whitespace-nowrap px-4 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-
-                      <button
-                        type="button"
-                        onClick={() => onEdit(item)}
-                        className="cursor-pointer rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100"
-                        title="Edit Status Pesanan"
-                        aria-label={`Edit pesanan ${item.id}`}
-                      >
-                        <Pencil size={14} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100"
-                        title="Opsi lainnya"
-                        aria-label={`Opsi lainnya untuk pesanan ${item.id}`}
-                      >
-                        <MoreHorizontal size={14} />
-                      </button>
-
-                    </div>
+                  <td className="whitespace-nowrap px-3 py-2.5 text-center">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(item)}
+                      className="inline-flex cursor-pointer items-center justify-center rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-black"
+                      title="Edit Status Pesanan"
+                      aria-label={`Edit pesanan ${item.id}`}
+                    >
+                      <Pencil size={13} />
+                    </button>
                   </td>
                 </tr>
               ))
@@ -191,28 +183,25 @@ export default function OrdersTable({
               <tr>
                 <td
                   colSpan={8}
-                  className="px-4 py-8 text-center text-xs text-gray-400"
+                  className="px-3 py-7 text-center text-[11px] text-gray-400"
                 >
                   Tidak ada pesanan yang sesuai filter atau pencarian.
                 </td>
               </tr>
             )}
-
           </tbody>
         </table>
       </div>
 
       {/* FOOTER TABEL */}
-      <div className="flex flex-col items-start justify-between gap-2 border-t border-gray-100 bg-white px-4 py-3 sm:flex-row sm:items-center">
-
-        <span className="text-[11px] font-semibold text-slate-500">
-          Menampilkan {filteredOrders.length} dari total {totalOrders} pesanan
+      <div className="flex flex-col justify-between gap-2 border-t border-gray-100 bg-white px-3 py-2.5 sm:flex-row sm:items-center">
+        <span className="text-[10px] font-medium text-slate-500">
+          Menampilkan {filteredOrders.length} dari {totalOrders} pesanan
         </span>
 
-        <span className="rounded bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
-          Scroll Ke Bawah Untuk Melihat Selengkapnya
+        <span className="text-[9px] font-medium text-slate-400">
+          Geser tabel ke samping untuk melihat kolom lainnya
         </span>
-
       </div>
     </div>
   );

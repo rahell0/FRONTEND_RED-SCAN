@@ -17,11 +17,14 @@ export default function OrderSearchFilter({
 }) {
   return (
     <div className="flex w-full flex-col gap-4">
+
       {/* INPUT PENCARIAN */}
-      <div className="relative w-full">
+      <div className="relative h-12 w-full">
+
         <Search
-          size={16}
-          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+          size={17}
+          strokeWidth={1.8}
+          className="pointer-events-none absolute left-4 top-0 bottom-0 z-10 my-auto text-gray-400"
         />
 
         <input
@@ -29,8 +32,27 @@ export default function OrderSearchFilter({
           placeholder="Cari ID atau kode transaksi..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full rounded-2xl border border-transparent bg-white py-2.5 pl-10 pr-4 text-xs text-[#1F1915] shadow-xs outline-none transition-all placeholder:text-gray-400 focus:border-gray-300"
+          className="
+            h-full
+            w-full
+            rounded-2xl
+            border
+            border-transparent
+            bg-white
+            py-0
+            pl-11
+            pr-4
+            text-xs
+            leading-normal
+            text-[#1F1915]
+            shadow-xs
+            outline-none
+            transition-all
+            placeholder:text-gray-400
+            focus:border-gray-300
+          "
         />
+
       </div>
 
       {/* FILTER STATUS PESANAN */}
@@ -54,6 +76,7 @@ export default function OrderSearchFilter({
           );
         })}
       </div>
+
     </div>
   );
 }

@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import {
   Pencil,
   MoreHorizontal,
-  ChevronDown,
-  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Trash2,
 } from 'lucide-react';
 
-const INITIAL_VISIBLE = 8;
+const ITEMS_PER_PAGE = 8;
 
 function getStatusStyle(status) {
   switch (status) {
@@ -29,30 +29,59 @@ export default function StockTable({
   onEdit,
   onDelete,
 }) {
-  const [showAll, setShowAll] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const visibleStock = showAll
-    ? filteredStock
-    : filteredStock.slice(0, INITIAL_VISIBLE);
+  // ==========================================
+  // PAGINATION
+  // ==========================================
 
-  const hasMore = filteredStock.length > INITIAL_VISIBLE;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredStock.length / ITEMS_PER_PAGE)
+  );
 
-  // Reset tampilan jika jumlah data sudah 8 atau kurang.
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const visibleStock = filteredStock.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  const startNumber =
+    filteredStock.length === 0 ? 0 : startIndex + 1;
+
+  const endNumber = Math.min(
+    startIndex + ITEMS_PER_PAGE,
+    filteredStock.length
+  );
+
+  // Kembali ke halaman pertama ketika filter atau pencarian berubah
   useEffect(() => {
-    if (filteredStock.length <= INITIAL_VISIBLE) {
-      setShowAll(false);
-    }
-  }, [filteredStock.length]);
+    setCurrentPage(1);
+  }, [filteredStock]);
 
-  // Tutup menu atau modal ketika tombol Escape ditekan.
+  // Menyesuaikan halaman jika jumlah bahan berkurang
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  // ==========================================
+  // MENUTUP MENU AKSI DENGAN ESCAPE
+  // ==========================================
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setOpenMenuId(null);
-        setDeleteItem(null);
+
+        if (!isDeleting) {
+          setDeleteItem(null);
+        }
       }
     };
 
@@ -61,12 +90,11 @@ export default function StockTable({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isDeleting]);
 
-  const handleToggle = () => {
-    setShowAll((prev) => !prev);
-    setOpenMenuId(null);
-  };
+  // ==========================================
+  // EDIT BAHAN
+  // ==========================================
 
   const handleEdit = (item) => {
     setOpenMenuId(null);
@@ -76,6 +104,10 @@ export default function StockTable({
     }
   };
 
+  // ==========================================
+  // KONFIRMASI HAPUS
+  // ==========================================
+
   const handleOpenDelete = (item) => {
     setOpenMenuId(null);
     setDeleteItem(item);
@@ -83,24 +115,21 @@ export default function StockTable({
 
   const handleCancelDelete = () => {
     if (isDeleting) return;
-
     setDeleteItem(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteItem || isDeleting) return;
 
     if (typeof onDelete !== 'function') {
-      console.error(
-        'Fungsi onDelete belum diteruskan dari Stok.jsx.'
-      );
+      console.error('Fungsi onDelete belum diteruskan dari Stok.jsx.');
       return;
     }
 
     setIsDeleting(true);
 
     try {
-      onDelete(deleteItem);
+      await onDelete(deleteItem);
 
       setDeleteItem(null);
       setOpenMenuId(null);
@@ -110,6 +139,10 @@ export default function StockTable({
       setIsDeleting(false);
     }
   };
+
+  // ==========================================
+  // TAMPILAN TABEL
+  // ==========================================
 
   return (
     <div className="relative w-full min-w-0 rounded-xl border border-gray-100 bg-white shadow-sm">
@@ -140,7 +173,6 @@ export default function StockTable({
           <tbody className="divide-y divide-gray-100">
             {visibleStock.length > 0 ? (
               visibleStock.map((item) => {
-                // Baca status dari data yang tersimpan.
                 const status =
                   item.status ||
                   (Number(item.stock) <= 0
@@ -154,7 +186,7 @@ export default function StockTable({
 
                 return (
                   <tr
-                    key={item.id}
+                    key={item.dbId ?? item.id}
                     className="h-[65px] text-sm text-gray-700 transition-colors hover:bg-gray-50"
                   >
                     <td className="overflow-hidden text-ellipsis whitespace-nowrap px-5 py-4 font-medium text-gray-500">
@@ -198,9 +230,7 @@ export default function StockTable({
                             type="button"
                             onClick={() =>
                               setOpenMenuId((current) =>
-                                current === item.id
-                                  ? null
-                                  : item.id
+                                current === item.id ? null : item.id
                               )
                             }
                             title="Lainnya"
@@ -256,10 +286,13 @@ export default function StockTable({
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* =====================================
+          PAGINATION
+      ===================================== */}
+
+      <div className="flex flex-col gap-4 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-gray-500">
-          Menampilkan {visibleStock.length} dari{' '}
-          {filteredStock.length} bahan
+          Menampilkan {startNumber}-{endNumber} dari {filteredStock.length} bahan
           {filteredStock.length !== totalStock && (
             <span>
               {' '}(total seluruh bahan: {totalStock})
@@ -267,24 +300,52 @@ export default function StockTable({
           )}
         </p>
 
-        {hasMore && (
-          <button
-            type="button"
-            onClick={handleToggle}
-            className="flex items-center justify-center gap-2 self-start text-sm font-semibold text-orange-600 transition hover:text-orange-700 sm:self-auto"
-          >
-            {showAll
-              ? 'Tampilkan Lebih Sedikit'
-              : 'Lihat Selengkapnya'}
+        {totalPages > 1 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((page) => page - 1)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Halaman sebelumnya"
+            >
+              <ChevronLeft size={18} />
+            </button>
 
-            {showAll ? (
-              <ChevronUp size={16} />
-            ) : (
-              <ChevronDown size={16} />
-            )}
-          </button>
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1
+            ).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`h-9 min-w-9 rounded-lg px-3 text-sm font-semibold transition ${
+                  currentPage === page
+                    ? 'bg-[#402719] text-white'
+                    : 'border border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((page) => page + 1)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Halaman berikutnya"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         )}
       </div>
+
+      {/* =====================================
+          MODAL KONFIRMASI HAPUS
+      ===================================== */}
 
       {deleteItem && (
         <div

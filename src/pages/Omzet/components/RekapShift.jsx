@@ -1,97 +1,133 @@
+
 import React from 'react';
-import { Filter } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 
-const shiftReports = [
-  {
-    id: 'SH-01',
-    name: 'Shift Pagi (08:00 - 16:00)',
-    cashier: 'Rian H.',
-    orders: 68,
-    cash: 'Rp 750.000',
-    qris: 'Rp 1.400.000',
-    total: 'Rp 2.150.000',
-  },
-  {
-    id: 'SH-02',
-    name: 'Shift Malam (16:00 - 00:00)',
-    cashier: 'Annisa K.',
-    orders: 82,
-    cash: 'Rp 900.000',
-    qris: 'Rp 1.800.000',
-    total: 'Rp 2.700.000',
-  },
-];
+export default function RekapShift({ laporan }) {
+  const qrisOmzet = Number(laporan?.qrisOmzet || 0);
+  const tunaiOmzet = Number(laporan?.tunaiOmzet || 0);
 
-export default function RekapShift() {
+  const qrisTransaksi = Number(laporan?.qrisTransaksi || 0);
+  const tunaiTransaksi = Number(laporan?.tunaiTransaksi || 0);
+
+  const totalOmzet = Number(laporan?.totalOmzet || 0);
+  const totalTransaksi = Number(laporan?.totalTransaksi || 0);
+
+  const formatRupiah = (angka) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(angka);
+  };
+
+  const rows = [
+    {
+      id: 'QRIS',
+      name: 'QRIS',
+      description: 'Pembayaran non-tunai',
+      orders: qrisTransaksi,
+      total: qrisOmzet,
+    },
+    {
+      id: 'TUNAI',
+      name: 'Tunai',
+      description: 'Pembayaran cash',
+      orders: tunaiTransaksi,
+      total: tunaiOmzet,
+    },
+  ];
+
   return (
-    <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-[#E6DFD5] shadow-xs flex flex-col justify-between">
+    <div className="flex flex-col justify-between rounded-2xl border border-[#E6DFD5] bg-white p-5 shadow-xs lg:col-span-2">
+
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-[#1F1915]">
-              Rekapitulasi Shift Kasir
+              Ringkasan Pembayaran
             </h3>
-            <p className="text-[11px] text-[#7A7167]">
-              Rincian pendapatan berdasarkan jadwal shift aktif hari ini
+
+            <p className="mt-1 text-[11px] text-[#7A7167]">
+              Rincian transaksi berdasarkan metode pembayaran
             </p>
           </div>
 
-          <Filter size={16} className="text-[#8C827A]" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F4F1EA] text-[#402719]">
+            <CreditCard size={17} />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[440px] text-left text-xs">
+
             <thead>
-              <tr className="border-b border-[#E6DFD5] text-[#7A7167] uppercase text-[10px] font-bold">
-                <th className="pb-3 px-2">Shift</th>
-                <th className="pb-3 px-2">Kasir</th>
-                <th className="pb-3 px-2 text-center">Transaksi</th>
-                <th className="pb-3 px-2">Cash</th>
-                <th className="pb-3 px-2">QRIS</th>
-                <th className="pb-3 px-2 text-right">Total Omzet</th>
+              <tr className="border-b border-[#E6DFD5] text-[10px] font-bold uppercase text-[#7A7167]">
+                <th className="px-2 pb-3">Metode Pembayaran</th>
+                <th className="px-2 pb-3">Keterangan</th>
+                <th className="px-2 pb-3 text-center">Transaksi</th>
+                <th className="px-2 pb-3 text-right">Total Omzet</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-[#F4F1EA]">
-              {shiftReports.map((row) => (
+              {rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-[#F9F8F6] transition-colors"
+                  className="transition-colors hover:bg-[#F9F8F6]"
                 >
-                  <td className="py-3.5 px-2 font-semibold text-[#1F1915]">
+                  <td className="px-2 py-5 font-semibold text-[#1F1915]">
                     {row.name}
                   </td>
-                  <td className="py-3.5 px-2 text-[#6B6259]">
-                    {row.cashier}
+
+                  <td className="px-2 py-5 text-[#6B6259]">
+                    {row.description}
                   </td>
-                  <td className="py-3.5 px-2 text-center font-medium">
+
+                  <td className="px-2 py-5 text-center font-medium text-[#1F1915]">
                     {row.orders}
                   </td>
-                  <td className="py-3.5 px-2 text-[#6B6259]">
-                    {row.cash}
-                  </td>
-                  <td className="py-3.5 px-2 text-[#6B6259]">
-                    {row.qris}
-                  </td>
-                  <td className="py-3.5 px-2 text-right font-bold text-[#1F1915]">
-                    {row.total}
+
+                  <td className="px-2 py-5 text-right font-bold text-[#1F1915]">
+                    {formatRupiah(row.total)}
                   </td>
                 </tr>
               ))}
             </tbody>
+
+            <tfoot>
+              <tr className="border-t border-[#E6DFD5]">
+                <td
+                  colSpan={2}
+                  className="px-2 py-4 font-bold text-[#1F1915]"
+                >
+                  Total
+                </td>
+
+                <td className="px-2 py-4 text-center font-bold text-[#1F1915]">
+                  {totalTransaksi}
+                </td>
+
+                <td className="px-2 py-4 text-right font-extrabold text-[#E54322]">
+                  {formatRupiah(totalOmzet)}
+                </td>
+              </tr>
+            </tfoot>
+
           </table>
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-[#E6DFD5] flex justify-between items-center text-xs">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#E6DFD5] pt-4 text-xs">
         <span className="text-[#7A7167]">
-          Total Gabungan Shift Hari Ini:
+          Total Omzet Transaksi Selesai:
         </span>
 
         <span className="text-base font-extrabold text-[#E54322]">
-          Rp 4.850.000
+          {formatRupiah(totalOmzet)}
         </span>
       </div>
+
     </div>
   );
 }

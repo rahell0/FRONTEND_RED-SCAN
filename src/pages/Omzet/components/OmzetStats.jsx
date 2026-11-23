@@ -1,12 +1,11 @@
 
 import React from 'react';
+
 import {
-  TrendingUp,
   DollarSign,
   ShoppingBag,
   CreditCard,
-  ArrowUpRight,
-  ArrowDownRight,
+  Banknote,
 } from 'lucide-react';
 
 export default function OmzetStats({ laporan }) {
@@ -35,81 +34,58 @@ export default function OmzetStats({ laporan }) {
     {
       title: 'Total Omzet',
       value: formatRupiah(totalOmzet),
-      change: 'Transaksi selesai',
-      isPositive: true,
+      description: 'Pendapatan transaksi selesai',
       icon: DollarSign,
-      subtext: 'Total pendapatan',
     },
     {
       title: 'Total Transaksi',
-      value: `${totalTransaksi} Pesanan`,
-      change: 'Transaksi selesai',
-      isPositive: true,
+      value: `${totalTransaksi} Transaksi`,
+      description: `Rata-rata ${formatRupiah(rataRata)} / transaksi`,
       icon: ShoppingBag,
-      subtext: `Rata-rata ${formatRupiah(rataRata)} / transaksi`,
     },
     {
-      title: 'Metode Non-Tunai (QRIS)',
+      title: 'Omzet QRIS',
       value: formatRupiah(qrisOmzet),
-      change: `${persentaseQris.toFixed(1)}% Total`,
-      isPositive: true,
+      description: `${persentaseQris.toFixed(1)}% dari total omzet`,
       icon: CreditCard,
-      subtext: 'Pendapatan melalui QRIS',
     },
     {
-      title: 'Pendapatan Tunai',
+      title: 'Omzet Tunai',
       value: formatRupiah(tunaiOmzet),
-      change: `${persentaseTunai.toFixed(1)}% Total`,
-      isPositive: false,
-      icon: TrendingUp,
-      subtext: 'Pendapatan melalui tunai',
+      description: `${persentaseTunai.toFixed(1)}% dari total omzet`,
+      icon: Banknote,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, idx) => {
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat) => {
         const Icon = stat.icon;
 
         return (
           <div
-            key={idx}
-            className="bg-white p-5 rounded-2xl border border-[#E6DFD5] shadow-xs flex flex-col justify-between min-w-0"
+            key={stat.title}
+            className="flex min-w-0 flex-col justify-between rounded-2xl border border-[#E6DFD5] bg-white p-5 shadow-xs"
           >
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="text-xs font-medium text-[#7A7167]">
                   {stat.title}
                 </span>
 
-                <div className="w-8 h-8 rounded-xl bg-[#F4F1EA] flex items-center justify-center text-[#E54322]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F4F1EA] text-[#E54322]">
                   <Icon size={16} />
                 </div>
               </div>
 
-              <h3 className="text-xl sm:text-2xl font-extrabold text-[#1F1915] tracking-tight break-words">
+              <h3 className="break-words text-xl font-extrabold tracking-tight text-[#1F1915] sm:text-2xl">
                 {stat.value}
               </h3>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[#F4F1EA] flex items-center justify-between gap-2 text-[11px]">
-              <span className="text-[#8C827A] truncate">
-                {stat.subtext}
-              </span>
-
-              <span
-                className={`inline-flex items-center shrink-0 font-bold px-1.5 py-0.5 rounded-md ${
-                  stat.isPositive
-                    ? 'bg-emerald-50 text-emerald-600'
-                    : 'bg-amber-50 text-amber-600'
-                }`}
-              >
-                {stat.isPositive ? (
-                  <ArrowUpRight size={13} />
-                ) : (
-                  <ArrowDownRight size={13} />
-                )}
-                {stat.change}
+            <div className="mt-4 border-t border-[#F4F1EA] pt-3">
+              <span className="text-[11px] text-[#8C827A]">
+                {stat.description}
               </span>
             </div>
           </div>

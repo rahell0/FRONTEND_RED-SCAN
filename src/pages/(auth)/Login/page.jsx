@@ -1,6 +1,9 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import logo from '../../../assets/logo.png';
+
 import {
   Eye,
   EyeOff,
@@ -9,6 +12,7 @@ import {
   Clock,
   ShieldCheck,
 } from 'lucide-react';
+
 import API from '../../../services/api';
 
 export default function Login({
@@ -27,14 +31,14 @@ export default function Login({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setErrorMessage('');
     setLoading(true);
 
     try {
-      // Kirim email dan password ke backend
       const response = await API.post('/auth/login', {
         email: userInput.trim(),
-        password: password,
+        password,
       });
 
       const data = response.data;
@@ -48,13 +52,9 @@ export default function Login({
 
       const userData = data.user;
 
-      // Simpan token JWT untuk permintaan API berikutnya
       localStorage.setItem('redscan_token', data.token);
-
-      // Simpan informasi pengguna
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // Perbarui data pengguna pada state aplikasi
       if (setUser) {
         setUser((prev) => ({
           ...prev,
@@ -66,7 +66,6 @@ export default function Login({
         }));
       }
 
-      // Arahkan pengguna ke dashboard
       navigate('/dashboard');
     } catch (error) {
       const message =
@@ -81,6 +80,7 @@ export default function Login({
 
   return (
     <div className="w-full flex flex-col items-center">
+
       {/* LOGO & BRANDING */}
       <div className="flex flex-col items-center mb-5">
         <img
@@ -109,7 +109,11 @@ export default function Login({
       )}
 
       {/* FORM LOGIN */}
-      <form onSubmit={handleSubmit} className="w-full space-y-3.5 text-left">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full space-y-3.5 text-left"
+      >
+        {/* EMAIL */}
         <div>
           <label className="text-xs font-bold text-[#2C221E] block mb-1">
             Email Admin
@@ -132,6 +136,7 @@ export default function Login({
           </div>
         </div>
 
+        {/* PASSWORD */}
         <div>
           <label className="text-xs font-bold text-[#2C221E] block mb-1">
             Kata Sandi
@@ -170,10 +175,11 @@ export default function Login({
             </button>
           </div>
 
+          {/* LUPA PASSWORD */}
           <div className="flex justify-end mt-1.5">
             <button
               type="button"
-              onClick={() => navigate('/forgot-password')}
+              onClick={() => navigate('/auth/forgot-password')}
               className="text-[11px] font-semibold text-[#2C221E] hover:underline cursor-pointer"
             >
               Lupa Kata Sandi?
@@ -181,6 +187,7 @@ export default function Login({
           </div>
         </div>
 
+        {/* SHIFT */}
         <div>
           <label className="text-xs font-bold text-[#2C221E] block mb-1">
             Shift
@@ -207,6 +214,7 @@ export default function Login({
           </div>
         </div>
 
+        {/* TOMBOL LOGIN */}
         <button
           type="submit"
           disabled={loading}
@@ -215,19 +223,6 @@ export default function Login({
           {loading ? 'Memproses Login...' : 'Login'}
         </button>
       </form>
-
-      <div className="mt-4 text-center">
-        <button
-          type="button"
-          onClick={() => navigate('/register')}
-          className="text-xs text-[#6B5E52] cursor-pointer"
-        >
-          Belum punya akun?{' '}
-          <span className="font-bold text-[#2C221E]">
-            Daftar →
-          </span>
-        </button>
-      </div>
 
       {/* FOOTER */}
       <div className="mt-8 pt-3 flex flex-col items-center justify-center gap-1 text-[9px] text-[#A39788]">

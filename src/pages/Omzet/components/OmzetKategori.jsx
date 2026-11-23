@@ -1,79 +1,99 @@
+
 import React from 'react';
 
-const omzetByCategory = [
-  {
-    category: 'Espresso Based',
-    totalQty: 184,
-    totalRevenue: 'Rp 2.450.000',
-    share: '50.5%',
-  },
-  {
-    category: 'Manual Brew',
-    totalQty: 62,
-    totalRevenue: 'Rp 990.000',
-    share: '20.4%',
-  },
-  {
-    category: 'Non-Coffee',
-    totalQty: 85,
-    totalRevenue: 'Rp 1.100.000',
-    share: '22.7%',
-  },
-  {
-    category: 'Snacks & Bakery',
-    totalQty: 41,
-    totalRevenue: 'Rp 310.000',
-    share: '6.4%',
-  },
-];
+export default function OmzetKategori({ laporan }) {
+  const qrisOmzet = Number(laporan?.qrisOmzet || 0);
+  const tunaiOmzet = Number(laporan?.tunaiOmzet || 0);
+  const totalOmzet = Number(laporan?.totalOmzet || 0);
 
-export default function OmzetKategori() {
+  const formatRupiah = (angka) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(angka);
+  };
+
+  const pembayaran = [
+    {
+      nama: 'QRIS',
+      omzet: qrisOmzet,
+      persentase:
+        totalOmzet > 0 ? (qrisOmzet / totalOmzet) * 100 : 0,
+      warna: '#648F94',
+    },
+    {
+      nama: 'Tunai',
+      omzet: tunaiOmzet,
+      persentase:
+        totalOmzet > 0 ? (tunaiOmzet / totalOmzet) * 100 : 0,
+      warna: '#402719',
+    },
+  ];
+
+  const pembayaranTerbesar =
+    qrisOmzet > tunaiOmzet
+      ? 'QRIS'
+      : tunaiOmzet > qrisOmzet
+        ? 'Tunai'
+        : 'Sama';
+
   return (
-    <div className="bg-white p-5 rounded-2xl border border-[#E6DFD5] shadow-xs flex flex-col justify-between">
+    <div className="flex flex-col justify-between rounded-2xl border border-[#E6DFD5] bg-white p-5 shadow-xs">
+
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-bold text-[#1F1915]">
-            Omzet per Kategori
+            Komposisi Pembayaran
           </h3>
 
-          <span className="text-[10px] bg-[#F4F1EA] text-[#7A7167] font-semibold px-2 py-1 rounded-md">
-            4 Kategori
+          <span className="rounded-md bg-[#F4F1EA] px-2 py-1 text-[10px] font-semibold text-[#7A7167]">
+            2 Metode
           </span>
         </div>
 
-        <div className="space-y-4">
-          {omzetByCategory.map((item, index) => (
-            <div key={index} className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
+        <div className="space-y-5">
+          {pembayaran.map((item) => (
+            <div key={item.nama} className="space-y-2">
+
+              <div className="flex items-center justify-between gap-2 text-xs">
                 <span className="font-semibold text-[#1F1915]">
-                  {item.category}
+                  {item.nama}
                 </span>
 
                 <span className="font-bold text-[#E54322]">
-                  {item.totalRevenue}
+                  {formatRupiah(item.omzet)}
                 </span>
               </div>
 
-              <div className="w-full bg-[#F4F1EA] h-2 rounded-full overflow-hidden flex">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[#F4F1EA]">
                 <div
-                  className="bg-[#1C1613] h-full rounded-full"
-                  style={{ width: item.share }}
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(item.persentase, 100)}%`,
+                    backgroundColor: item.warna,
+                  }}
                 />
               </div>
 
               <div className="flex justify-between text-[10px] text-[#8C827A]">
-                <span>{item.totalQty} porsi terjual</span>
-                <span>{item.share} dari total</span>
+                <span>{item.persentase.toFixed(1)}% dari omzet</span>
+                <span>{formatRupiah(item.omzet)}</span>
               </div>
+
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 p-3 bg-[#F4F1EA] rounded-xl border border-[#E6DFD5] text-center text-xs text-[#7A7167]">
-        Kategori terlaris hari ini:{' '}
-        <strong className="text-[#1F1915]">Espresso Based</strong>
+      <div className="mt-6 rounded-xl border border-[#E6DFD5] bg-[#F4F1EA] p-3 text-center text-xs text-[#7A7167]">
+        Metode pembayaran terbesar:{' '}
+        <strong className="text-[#1F1915]">
+          {pembayaranTerbesar}
+        </strong>
       </div>
+
     </div>
   );
 }
